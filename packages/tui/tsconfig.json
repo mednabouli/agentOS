@@ -4,7 +4,8 @@
     "rootDir": "src",
     "outDir": "dist",
     "composite": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "types": ["node"]
   },
   "references": [{ "path": "../core" }],
   "include": ["src/**/*.ts", "src/**/*.tsx"],
