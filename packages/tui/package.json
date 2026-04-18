@@ -31,7 +31,11 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "publishConfig": {
     "access": "public",
     "provenance": true
@@ -44,15 +48,15 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@agentos/core": "^0.1.0",
+    "@agentos/core": "workspace:*",
     "ink": "^5.2.1",
     "react": "^18.3.1"
   },
   "devDependencies": {
-    "@types/node": "^20.17.0",
-    "@types/react": "^18.3.0",
-    "typescript": "^5.8.0",
-    "vitest": "^3.1.0"
+    "@types/node": "^20.19.39",
+    "@types/react": "^18.3.28",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=20.0.0"

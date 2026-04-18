@@ -26,7 +26,11 @@
   "bin": {
     "agentos": "./dist/bin/index.js"
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "publishConfig": {
     "access": "public",
     "provenance": true
@@ -39,13 +43,13 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@agentos/core": "^0.1.0",
-    "@agentos/tui": "^0.2.0"
+    "@agentos/core": "workspace:*",
+    "@agentos/tui": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^20.17.0",
-    "typescript": "^5.8.0",
-    "vitest": "^3.1.0"
+    "@types/node": "^20.19.39",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=20.0.0"
