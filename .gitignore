@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.next/
+out/
+build/
+
+# Turbo
+.turbo/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# AgentOS state (real DB — not committed)
+.agentOS/state/*.db
+.agentOS/state/*.db-shm
+.agentOS/state/*.db-wal
+.agentOS/config.yaml
+
+# TypeScript
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Tauri
+src-tauri/target/
+
+# Editors
+.vscode/settings.json
+.idea/

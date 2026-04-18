@@ -1,0 +1,29 @@
+# AgentOS Configuration
+# Copy to config.yaml and fill in your values.
+# config.yaml is gitignored — never commit secrets.
+
+api:
+  anthropic_key: ""          # or set ANTHROPIC_API_KEY env var
+
+state:
+  backend: sqlite            # "sqlite" | "supabase"
+  sqlite_path: .agentOS/state/agentos.db
+
+  # Supabase (only needed when backend: supabase)
+  supabase_url: ""
+  supabase_anon_key: ""
+
+models:
+  orchestrator: claude-opus-4
+  planner: claude-sonnet-4-5
+  developer: claude-sonnet-4-5
+  tester: claude-haiku-4
+  reviewer: claude-haiku-4
+  debugger: claude-sonnet-4-5
+
+budget:
+  max_cost_per_task: 5.00    # USD — hard stop if exceeded
+  warn_at: 1.00              # USD — show warning in TUI
+
+logging:
+  level: info                # "debug" | "info" | "warn" | "error"

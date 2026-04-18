@@ -1,0 +1,28 @@
+{
+  "name": "agentos",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Multi-interface AI agent orchestration platform built natively for Claude",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.1.0"
+  },
+  "packageManager": "pnpm@10.14.0",
+  "pnpm": {
+    "onlyBuiltDependencies": ["better-sqlite3", "esbuild", "turbo", "@esbuild/darwin-arm64"]
+  }
+}
