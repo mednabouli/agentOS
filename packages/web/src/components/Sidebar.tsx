@@ -13,7 +13,7 @@ const NAV = [
   { href: '/settings', label: 'Settings', icon: '⚙' },
 ] as const;
 
-export function Sidebar(): React.ReactElement {
+export function Sidebar() {
   const pathname = usePathname();
 
   return (

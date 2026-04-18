@@ -1,7 +1,27 @@
 {
   "name": "@agentos/core",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "AgentOS orchestration engine — pure TypeScript, zero UI deps",
+  "license": "MIT",
+  "author": "Med Nabouli",
+  "homepage": "https://github.com/med-nabouli/agentOS#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/med-nabouli/agentOS.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/med-nabouli/agentOS/issues"
+  },
+  "keywords": [
+    "claude",
+    "anthropic",
+    "ai-agents",
+    "multi-agent",
+    "orchestration",
+    "llm",
+    "agentos"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -11,7 +31,11 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": ["dist"],
+  "files": ["dist", "README.md", "LICENSE"],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsc --build",
     "dev": "tsc --build --watch",
@@ -32,5 +56,8 @@
     "@types/node": "^20.17.0",
     "typescript": "^5.8.0",
     "vitest": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

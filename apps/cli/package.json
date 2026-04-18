@@ -1,12 +1,36 @@
 {
   "name": "agentos",
   "version": "1.0.0",
-  "description": "AgentOS CLI — npx agentos entry point",
+  "description": "Drop in your Claude API key. Run one command. Watch a swarm of agents build your feature.",
+  "license": "MIT",
+  "author": "Med Nabouli",
+  "homepage": "https://github.com/med-nabouli/agentOS#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/med-nabouli/agentOS.git",
+    "directory": "apps/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/med-nabouli/agentOS/issues"
+  },
+  "keywords": [
+    "claude",
+    "anthropic",
+    "ai-agents",
+    "multi-agent",
+    "orchestration",
+    "cli",
+    "agentos"
+  ],
   "type": "module",
   "bin": {
     "agentos": "./dist/bin/index.js"
   },
-  "files": ["dist"],
+  "files": ["dist", "README.md", "LICENSE"],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsc --build",
     "dev": "tsc --build --watch",
@@ -15,8 +39,8 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@agentos/core": "workspace:*",
-    "@agentos/tui": "workspace:*"
+    "@agentos/core": "^0.1.0",
+    "@agentos/tui": "^0.2.0"
   },
   "devDependencies": {
     "@types/node": "^20.17.0",
