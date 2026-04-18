@@ -1,3 +1,9 @@
+// Patch global.console.Console for Ink tests (Node.js/Ink compatibility)
+import { Console } from 'console';
+if (!('Console' in console)) {
+  // @ts-ignore
+  (console as any).Console = Console;
+}
 import { describe, it, expect, vi } from 'vitest';
 import { render } from 'ink';
 import { PassThrough } from 'node:stream';
