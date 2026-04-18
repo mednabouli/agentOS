@@ -27,4 +27,8 @@
       "cache": false
     }
   }
+  ,
+  "remoteCache": {
+    "enabled": false
+  }
 }

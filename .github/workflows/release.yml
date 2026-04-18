@@ -24,6 +24,14 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
+
+      - name: Disable Turbo remote cache and clear Vercel/Turbo tokens
+        run: |
+          echo "TURBO_REMOTE_ONLY=false" >> $GITHUB_ENV
+          echo "TURBO_API=''" >> $GITHUB_ENV
+          echo "TURBO_TOKEN=''" >> $GITHUB_ENV
+          echo "VERCEL_TOKEN=''" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
