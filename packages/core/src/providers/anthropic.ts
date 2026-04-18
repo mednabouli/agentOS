@@ -17,7 +17,7 @@ export class AnthropicProvider implements ModelProvider {
     };
 
     if (req.thinkingBudget > 0) {
-      (params as Record<string, unknown>)['thinking'] = {
+      ((params as unknown) as Record<string, unknown>)['thinking'] = {
         type: 'enabled',
         budget_tokens: req.thinkingBudget,
       };
