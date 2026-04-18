@@ -41,12 +41,9 @@ describe('AnthropicProvider', () => {
   });
 
   it('includes thinking param when thinkingBudget > 0', async () => {
-    const Anthropic = (await import('@anthropic-ai/sdk')).default;
-    const mockCreate = vi.mocked(
-      (Anthropic as unknown as ReturnType<typeof vi.fn>).mock.results[0]?.value.messages.create,
-    );
-
     const provider = new AnthropicProvider('sk-test');
+    const mockCreate = (provider as any).client.messages.create;
+
     await provider.complete({
       model: 'claude-opus-4-5',
       systemPrompt: 'sys',
@@ -55,7 +52,7 @@ describe('AnthropicProvider', () => {
       maxTokens: 8192,
     });
 
-    const call = mockCreate?.mock.calls[mockCreate.mock.calls.length - 1]?.[0] as Record<string, unknown>;
+    const call = mockCreate.mock.calls[mockCreate.mock.calls.length - 1]?.[0] as Record<string, unknown>;
     expect(call?.['thinking']).toEqual({ type: 'enabled', budget_tokens: 16_000 });
   });
 });

@@ -15,7 +15,7 @@ export const BUILT_IN_TEMPLATES: AgentTemplate[] = [
     tags: ['payments', 'stripe', 'ecommerce', 'backend'],
     variables: [
       { name: 'PAYMENT_PROVIDER', description: 'Payment provider name (e.g. Stripe, Paddle)', required: true },
-      { name: 'FEATURE', description: 'What payment feature to add (e.g. checkout, subscriptions)', required: true, default: 'checkout' },
+      { name: 'FEATURE', description: 'What payment feature to add (e.g. checkout, subscriptions)', required: true },
       { name: 'CURRENCY', description: 'Primary currency code (e.g. USD, EUR)', required: false, default: 'USD' },
     ],
     nodes: [
