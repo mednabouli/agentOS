@@ -68,5 +68,16 @@ export function createSupabaseAdapter(url: string, anonKey: string): StateAdapte
 
       if (error !== null) throw new Error(error.message);
     },
+
+    async listTaskIds(): Promise<string[]> {
+      const { data, error } = await supabase
+        .from('checkpoints')
+        .select('task_id')
+        .order('created_at', { ascending: false })
+        .returns<Array<{ task_id: string }>>();
+
+      if (error !== null) throw new Error(error.message);
+      return [...new Set((data ?? []).map((r) => r.task_id))];
+    },
   };
 }

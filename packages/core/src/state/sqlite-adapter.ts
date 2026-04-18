@@ -50,6 +50,10 @@ export function createSqliteAdapter(dbPath: string): StateAdapter {
     DELETE FROM checkpoints WHERE task_id = ?
   `);
 
+  const selectTaskIds = db.prepare<[], { task_id: string }>(`
+    SELECT DISTINCT task_id FROM checkpoints ORDER BY created_at DESC
+  `);
+
   function rowToCheckpoint(row: CheckpointRow): PhaseCheckpoint {
     return {
       id: row.id,
@@ -82,6 +86,10 @@ export function createSqliteAdapter(dbPath: string): StateAdapter {
 
     async deleteCheckpoints(taskId: string): Promise<void> {
       deleteAll.run(taskId);
+    },
+
+    async listTaskIds(): Promise<string[]> {
+      return selectTaskIds.all().map((r) => r.task_id);
     },
   };
 }

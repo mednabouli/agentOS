@@ -1,6 +1,6 @@
 {
   "name": "agentos",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "AgentOS CLI — npx agentos entry point",
   "type": "module",
   "bin": {

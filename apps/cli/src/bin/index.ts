@@ -1,41 +1,75 @@
 #!/usr/bin/env node
+import { runInit } from '../commands/init.js';
+import { runRun } from '../commands/run.js';
+import { runStatus } from '../commands/status.js';
+import { runLogs } from '../commands/logs.js';
+import { runCost } from '../commands/cost.js';
+import { runAgentsList } from '../commands/agents.js';
+import { runPause } from '../commands/pause.js';
+import { runResume } from '../commands/resume.js';
+import { printHelp, red } from '../lib/format.js';
 
-// AgentOS CLI — v0.1 stub
-// Full implementation in Week 4 milestone
-//
-// Planned commands:
-//   agentos init
-//   agentos run <prompt>
-//   agentos run --prd <path>
-//   agentos status
-//   agentos logs [task-id]
-//   agentos cost [task-id]
-//   agentos pause / resume
-//   agentos agents list
+const [, , command, ...rest] = process.argv;
 
-const [,, command, ...args] = process.argv;
+async function main(): Promise<void> {
+  const rootDir = process.cwd();
 
-if (command === undefined || command === '--help' || command === '-h') {
-  console.log(`
-AgentOS v0.0.1
+  switch (command) {
+    case 'init':
+      runInit(rootDir);
+      break;
 
-Usage: agentos <command> [options]
+    case 'run':
+      await runRun(rest, rootDir);
+      break;
 
-Commands:
-  init              Scaffold AGENTS.md + config
-  run <prompt>      Launch agent swarm
-  run --prd <path>  Run from PRD file
-  status            Show active swarm
-  logs [task-id]    View agent logs
-  cost [task-id]    Token cost breakdown
-  pause             Pause active swarm
-  resume            Resume from checkpoint
+    case 'status':
+      await runStatus(rootDir);
+      break;
 
-Run 'agentos <command> --help' for more information.
-`);
-  process.exit(0);
+    case 'logs':
+      await runLogs(rest, rootDir);
+      break;
+
+    case 'cost':
+      await runCost(rest, rootDir);
+      break;
+
+    case 'agents': {
+      const sub = rest[0];
+      if (sub === 'list') {
+        runAgentsList();
+      } else {
+        console.error(red('Error:') + ` Unknown subcommand: agents ${sub ?? ''}`);
+        console.error('  Usage: agentos agents list');
+        process.exit(1);
+      }
+      break;
+    }
+
+    case 'pause':
+      runPause(rootDir);
+      break;
+
+    case 'resume':
+      await runResume(rootDir);
+      break;
+
+    case undefined:
+    case '--help':
+    case '-h':
+    case 'help':
+      printHelp();
+      break;
+
+    default:
+      console.error(red('Error:') + ` Unknown command: ${command}`);
+      printHelp();
+      process.exit(1);
+  }
 }
 
-console.error(`Command '${command}' is not yet implemented. Check back in v0.2.`);
-void args;
-process.exit(1);
+main().catch((err: unknown) => {
+  console.error(red('Error:'), err instanceof Error ? err.message : String(err));
+  process.exit(1);
+});

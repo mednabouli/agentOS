@@ -1,7 +1,7 @@
 {
   "name": "@agentos/web",
-  "version": "0.0.1",
-  "description": "AgentOS Next.js dashboard — stub",
+  "version": "1.5.0",
+  "description": "AgentOS Next.js dashboard",
   "private": true,
   "scripts": {
     "dev": "next dev",

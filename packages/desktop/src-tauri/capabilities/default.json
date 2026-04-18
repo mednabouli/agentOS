@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schema.tauri.app/core/2/schema.json",
+  "identifier": "default",
+  "description": "Default capability for AgentOS desktop window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-close",
+    "shell:allow-spawn",
+    "shell:allow-kill",
+    "shell:allow-stdin-write"
+  ]
+}

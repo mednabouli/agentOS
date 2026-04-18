@@ -8,6 +8,7 @@ export interface StateAdapter {
   loadCheckpoint(taskId: string, phase: WorkflowPhase): Promise<PhaseCheckpoint | null>;
   listCheckpoints(taskId: string): Promise<PhaseCheckpoint[]>;
   deleteCheckpoints(taskId: string): Promise<void>;
+  listTaskIds(): Promise<string[]>;
 }
 
 let _adapter: StateAdapter | null = null;
@@ -84,6 +85,15 @@ export class StateManager {
       await adapter.deleteCheckpoints(taskId);
     } catch (err) {
       throw new StateError(`Failed to delete checkpoints for task ${taskId}`, err);
+    }
+  }
+
+  async listTaskIds(): Promise<string[]> {
+    const adapter = await getAdapter();
+    try {
+      return await adapter.listTaskIds();
+    } catch (err) {
+      throw new StateError('Failed to list task IDs', err);
     }
   }
 

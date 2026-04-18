@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build core (required by dependents)
+        run: pnpm --filter @agentos/core build
+
+      - name: Typecheck all packages
+        run: |
+          pnpm --filter @agentos/core typecheck
+          pnpm --filter @agentos/tui typecheck
+          pnpm --filter agentos typecheck
+          pnpm --filter @agentos/web typecheck
+          pnpm --filter @agentos/desktop typecheck
+
+      - name: Test all packages
+        run: |
+          pnpm --filter @agentos/core test
+          pnpm --filter @agentos/tui test
+          pnpm --filter agentos test
+          pnpm --filter @agentos/web test
+          pnpm --filter @agentos/desktop test
+
+  lint-commits:
+    name: Lint PR commits
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check commit messages
+        run: |
+          git log --oneline ${{ github.event.pull_request.base.sha }}..${{ github.sha }} \
+            | grep -qvP '^[0-9a-f]+ (WIP|fixup|squash)' || true
