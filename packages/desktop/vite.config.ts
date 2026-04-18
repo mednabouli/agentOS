@@ -14,6 +14,6 @@ export default defineConfig({
     target: process.env['TAURI_ENV_PLATFORM'] === 'windows' ? 'chrome105' : 'safari15',
     minify: process.env['TAURI_ENV_DEBUG'] !== undefined ? false : 'esbuild',
     sourcemap: process.env['TAURI_ENV_DEBUG'] !== undefined,
-    rollupOptions: { output: { manualChunks: undefined } },
+    rollupOptions: { output: {} },
   },
 });
