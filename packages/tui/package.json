@@ -1,7 +1,7 @@
 {
   "name": "@agentos/tui",
-  "version": "0.0.1",
-  "description": "AgentOS Ink terminal UI — stub",
+  "version": "0.2.0",
+  "description": "AgentOS Ink terminal UI",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,10 +19,13 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@agentos/core": "workspace:*"
+    "@agentos/core": "workspace:*",
+    "ink": "^5.2.1",
+    "react": "^18.3.1"
   },
   "devDependencies": {
     "@types/node": "^20.17.0",
+    "@types/react": "^18.3.0",
     "typescript": "^5.8.0",
     "vitest": "^3.1.0"
   }

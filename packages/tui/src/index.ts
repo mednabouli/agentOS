@@ -1,4 +1,13 @@
-export const TUI_VERSION = 'stub-0.0.1';
+export const TUI_VERSION = '0.2.0';
 
-// Ink terminal UI — to be implemented in v0.2
-// Will render: orchestrator pane, agent swarm pane, token budget pane, live logs pane, phase gate pane
+export { runTui } from './run.js';
+export { App } from './app.js';
+export type { AppProps } from './app.js';
+export type {
+  TuiState,
+  TuiAction,
+  AgentEntry,
+  TokenEntry,
+  PendingApproval,
+  PhaseRunStatus,
+} from './state.js';
