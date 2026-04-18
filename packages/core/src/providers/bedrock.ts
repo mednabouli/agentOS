@@ -61,7 +61,7 @@ export class BedrockProvider implements ModelProvider {
 
     const response = await client.send(command);
     const blocks = response.output?.message?.content ?? [];
-    const text = (blocks as Array<Record<string, unknown>>)
+    const text = ((blocks as unknown) as Array<Record<string, unknown>>)
       .filter((b) => typeof b['text'] === 'string')
       .map((b) => b['text'] as string)
       .join('\n');
