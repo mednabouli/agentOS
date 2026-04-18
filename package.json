@@ -29,5 +29,8 @@
       "turbo",
       "@esbuild/darwin-arm64"
     ]
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1032.0"
   }
 }
