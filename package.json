@@ -16,10 +16,10 @@
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {
-    "@types/node": "^20.19.39",
+    "@types/node": "^25.0.0",
     "turbo": "latest",
-    "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "typescript": "^6.0.0",
+    "vitest": "^4.0.0"
   },
   "packageManager": "pnpm@10.14.0",
   "pnpm": {
