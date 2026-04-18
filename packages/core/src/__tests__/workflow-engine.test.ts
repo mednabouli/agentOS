@@ -105,4 +105,27 @@ describe('WorkflowEngine', () => {
     const engine = new WorkflowEngine({ context: MOCK_CONTEXT });
     expect(engine.getTracer()).toBeDefined();
   });
+
+  it('uses caller-supplied taskId when provided via WorkflowRunOptions', async () => {
+    const engine = new WorkflowEngine({ context: MOCK_CONTEXT });
+    const events: WorkflowEvent[] = [];
+    engine.on('event', (e) => events.push(e));
+
+    const fixedId = 'sidecar-task-id-from-rust';
+    const nodes = makeNodes();
+    const runPromise = engine.run(nodes, { taskId: fixedId });
+
+    await vi.waitFor(() => {
+      expect(events.some((e) => e.type === 'human_approval_required')).toBe(true);
+    }, { timeout: 3000 });
+
+    const gate = events.find((e) => e.type === 'human_approval_required');
+    if (gate?.type === 'human_approval_required') {
+      engine.approve(gate.taskId);
+    }
+
+    const returnedId = await runPromise;
+    expect(returnedId).toBe(fixedId);
+    expect(events.every((e) => 'taskId' in e ? e.taskId === fixedId : true)).toBe(true);
+  }, 10_000);
 });

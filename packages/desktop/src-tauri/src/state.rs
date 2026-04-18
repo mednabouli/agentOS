@@ -1,7 +1,6 @@
 use portable_pty::MasterPty;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::io::Write;
 use std::path::PathBuf;
 use std::sync::{mpsc, Arc, Mutex};
 
@@ -36,9 +35,15 @@ pub struct PtySession {
     pub child: Arc<Mutex<Box<dyn portable_pty::Child + Send + Sync>>>,
 }
 
+pub struct TaskSession {
+    pub stdin_tx: mpsc::SyncSender<String>,
+    pub child: Arc<Mutex<std::process::Child>>,
+}
+
 pub struct AppState {
     pub config: AppConfig,
     pub ptys: HashMap<String, PtySession>,
+    pub tasks: HashMap<String, TaskSession>,
     pub config_path: PathBuf,
 }
 
@@ -61,6 +66,7 @@ impl AppState {
         Self {
             config,
             ptys: HashMap::new(),
+            tasks: HashMap::new(),
             config_path,
         }
     }

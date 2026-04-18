@@ -4,11 +4,13 @@ import { Tracer } from '../tracer/index.js';
 import { generateId } from '../utils/id.js';
 import { logger } from '../utils/logger.js';
 import { getModelConfig } from '../config/model-registry.js';
+import type { RoutingConfig } from '../config/routing.js';
 
 export interface OrchestratorOptions {
   apiKey?: string | undefined;
   context: CodebaseContext;
   tracer?: Tracer | undefined;
+  routing?: RoutingConfig | undefined;
 }
 
 export interface ExecutionResult {
@@ -23,7 +25,7 @@ export class Orchestrator {
   private readonly context: CodebaseContext;
 
   constructor(options: OrchestratorOptions) {
-    this.spawner = new AgentSpawner({ apiKey: options.apiKey });
+    this.spawner = new AgentSpawner({ apiKey: options.apiKey, routing: options.routing });
     this.tracer = options.tracer ?? new Tracer();
     this.context = options.context;
   }

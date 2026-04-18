@@ -1,8 +1,8 @@
-use crate::state::{AppConfig, AppState, PtySession, SharedState};
+use crate::state::{AppConfig, AppState, PtySession, SharedState, TaskSession};
 use portable_pty::{CommandBuilder, NativePtySystem, PtySize, PtySystem};
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
-use std::io::{Read, Write};
+use std::io::{BufRead, BufReader, Read, Write};
 use std::path::PathBuf;
 use std::sync::{mpsc, Arc, Mutex};
 use tauri::{AppHandle, Emitter, State};
@@ -53,7 +53,6 @@ pub fn list_tasks(state: State<'_, SharedState>) -> Result<Vec<TaskSummary>, Str
     for row in rows {
         let (task_id, created_at) = row.map_err(|e| e.to_string())?;
 
-        // Get last checkpoint for this task
         let phase_and_cost: Result<(String, f64), _> = conn.query_row(
             "SELECT phase, state_json FROM checkpoints WHERE task_id = ? ORDER BY created_at DESC LIMIT 1",
             [&task_id],
@@ -95,6 +94,86 @@ pub fn save_config(config: AppConfig, state: State<'_, SharedState>) -> Result<(
 }
 
 #[tauri::command]
+pub fn start_task(
+    prompt: String,
+    app: AppHandle,
+    state: State<'_, SharedState>,
+) -> Result<String, String> {
+    let task_id = Uuid::new_v4().to_string();
+
+    let mut child = std::process::Command::new("agentos")
+        .args(["run", &prompt, "--ipc", "--task-id", &task_id])
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+        .map_err(|e| format!("Failed to spawn agentos sidecar: {e}. Is `agentos` on PATH?"))?;
+
+    let stdin = child.stdin.take().ok_or("failed to open child stdin")?;
+    let stdout = child.stdout.take().ok_or("failed to open child stdout")?;
+
+    // Channel: Tauri commands → child stdin
+    let (stdin_tx, stdin_rx) = mpsc::sync_channel::<String>(32);
+
+    // Writer thread: drain channel → child stdin
+    std::thread::spawn(move || {
+        let mut writer = stdin;
+        while let Ok(line) = stdin_rx.recv() {
+            if writer.write_all(line.as_bytes()).is_err() {
+                break;
+            }
+        }
+    });
+
+    // Reader thread: parse NDJSON from child stdout → Tauri frontend events
+    let app_r = app.clone();
+    std::thread::spawn(move || {
+        let reader = BufReader::new(stdout);
+        for line in reader.lines() {
+            match line {
+                Ok(l) if !l.is_empty() => {
+                    if let Ok(val) = serde_json::from_str::<serde_json::Value>(&l) {
+                        let _ = app_r.emit("workflow:event", val);
+                    }
+                }
+                _ => break,
+            }
+        }
+    });
+
+    let child = Arc::new(Mutex::new(child));
+    let session = TaskSession { stdin_tx, child };
+
+    let mut st = state.lock().map_err(|e| e.to_string())?;
+    st.tasks.insert(task_id.clone(), session);
+
+    Ok(task_id)
+}
+
+#[tauri::command]
+pub fn approve_task(task_id: String, state: State<'_, SharedState>) -> Result<(), String> {
+    let st = state.lock().map_err(|e| e.to_string())?;
+    let session = st.tasks.get(&task_id).ok_or("task not found")?;
+    let msg =
+        serde_json::json!({ "action": "approve", "taskId": task_id }).to_string() + "\n";
+    session.stdin_tx.send(msg).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn reject_task(
+    task_id: String,
+    reason: String,
+    state: State<'_, SharedState>,
+) -> Result<(), String> {
+    let st = state.lock().map_err(|e| e.to_string())?;
+    let session = st.tasks.get(&task_id).ok_or("task not found")?;
+    let msg =
+        serde_json::json!({ "action": "reject", "taskId": task_id, "reason": reason }).to_string()
+            + "\n";
+    session.stdin_tx.send(msg).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub fn spawn_terminal(
     cols: u16,
     rows: u16,
@@ -114,7 +193,6 @@ pub fn spawn_terminal(
     let child = pair.slave.spawn_command(cmd).map_err(|e| e.to_string())?;
     let id = Uuid::new_v4().to_string();
 
-    // Reader thread: forward pty output → frontend event
     let mut reader = pair.master.try_clone_reader().map_err(|e| e.to_string())?;
     let id_r = id.clone();
     let app_r = app.clone();
@@ -134,7 +212,6 @@ pub fn spawn_terminal(
         }
     });
 
-    // Writer thread: drain channel → pty master
     let (tx, rx) = mpsc::channel::<Vec<u8>>();
     let mut writer = pair.master.take_writer().map_err(|e| e.to_string())?;
     std::thread::spawn(move || {
@@ -159,10 +236,7 @@ pub fn spawn_terminal(
 pub fn write_pty(id: String, data: String, state: State<'_, SharedState>) -> Result<(), String> {
     let state = state.lock().map_err(|e| e.to_string())?;
     let session = state.ptys.get(&id).ok_or("pty not found")?;
-    session
-        .tx
-        .send(data.into_bytes())
-        .map_err(|e| e.to_string())
+    session.tx.send(data.into_bytes()).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -189,21 +263,4 @@ pub fn kill_pty(id: String, state: State<'_, SharedState>) -> Result<(), String>
         }
     }
     Ok(())
-}
-
-#[tauri::command]
-pub fn start_task(_prompt: String) -> Result<String, String> {
-    // Task execution is handled by spawning the CLI via the terminal.
-    // This command is a placeholder for future sidecar integration.
-    Err("Use the terminal pane to run: agentos run \"<prompt>\"".into())
-}
-
-#[tauri::command]
-pub fn approve_task(_task_id: String) -> Result<(), String> {
-    Err("Approval via desktop UI requires the task runner sidecar (v2.1)".into())
-}
-
-#[tauri::command]
-pub fn reject_task(_task_id: String, _reason: String) -> Result<(), String> {
-    Err("Rejection via desktop UI requires the task runner sidecar (v2.1)".into())
 }

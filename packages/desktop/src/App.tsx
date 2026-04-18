@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Titlebar } from './components/Titlebar';
 import { DashboardPane, type DashboardView } from './components/DashboardPane';
 import { TerminalPane } from './components/TerminalPane';
@@ -44,6 +44,13 @@ export default function App() {
   }, []);
 
   const hasPending = taskState.pendingApproval !== null;
+
+  // Auto-navigate to approval tab when a gate fires
+  useEffect(() => {
+    if (taskState.pendingApproval !== null) {
+      setView('approval');
+    }
+  }, [taskState.pendingApproval]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: colors.bg }}>

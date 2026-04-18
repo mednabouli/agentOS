@@ -225,9 +225,9 @@ See [CLAUDE.md](CLAUDE.md) for codebase conventions and [AGENTS.md](AGENTS.md) f
 - [x] v1.0 — CLI public launch
 - [x] v1.5 — Next.js web dashboard
 - [x] v2.0 — Tauri desktop app
-- [ ] v2.1 — In-process task runner sidecar for desktop approve/reject
-- [ ] v3.0 — Custom model routing (Bedrock, Azure OpenAI)
-- [ ] v3.1 — Agent marketplace + template library
+- [x] v2.1 — In-process task runner sidecar for desktop approve/reject
+- [x] v3.0 — Custom model routing (Bedrock, Azure OpenAI)
+- [x] v3.1 — Agent marketplace + template library
 
 ---
 

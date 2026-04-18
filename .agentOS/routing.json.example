@@ -1,0 +1,41 @@
+{
+  "_comment": "Copy to .agentOS/routing.json to override which provider/model each agent role uses.",
+  "_comment2": "Env vars AGENTOS_ROUTE_<ROLE>=<provider>:<model> take priority over this file.",
+
+  "orchestrator": {
+    "provider": "bedrock",
+    "model": "anthropic.claude-opus-4-5-20251101",
+    "credentials": {
+      "awsRegion": "us-east-1"
+    }
+  },
+
+  "planner": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-5"
+  },
+
+  "developer": {
+    "provider": "azure-openai",
+    "model": "gpt-4o",
+    "credentials": {
+      "azureEndpoint": "https://YOUR_RESOURCE.openai.azure.com/",
+      "azureApiVersion": "2024-10-21"
+    }
+  },
+
+  "tester": {
+    "provider": "bedrock",
+    "model": "anthropic.claude-haiku-4-5-20251001"
+  },
+
+  "reviewer": {
+    "provider": "anthropic",
+    "model": "claude-haiku-4-5"
+  },
+
+  "debugger": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-5"
+  }
+}

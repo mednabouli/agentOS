@@ -16,14 +16,17 @@ import {
   PhaseError,
   ApprovalRejectedError,
 } from '../utils/errors.js';
+import type { RoutingConfig } from '../config/routing.js';
 
 export interface WorkflowOptions {
   apiKey?: string | undefined;
   context: CodebaseContext;
+  routing?: RoutingConfig | undefined;
 }
 
 export interface WorkflowRunOptions {
   resumeFrom?: WorkflowPhase | undefined;
+  taskId?: string | undefined;
 }
 
 type ApprovalResolver = (approved: boolean, reason?: string) => void;
@@ -43,6 +46,7 @@ export class WorkflowEngine {
       apiKey: options.apiKey,
       context: options.context,
       tracer: this.tracer,
+      routing: options.routing,
     });
   }
 
@@ -57,7 +61,7 @@ export class WorkflowEngine {
   }
 
   async run(nodes: TaskNode[], opts: WorkflowRunOptions = {}): Promise<string> {
-    const taskId = generateId();
+    const taskId = opts.taskId ?? generateId();
     const startPhase = opts.resumeFrom ?? PHASES[0];
 
     if (startPhase === undefined) {

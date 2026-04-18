@@ -56,6 +56,12 @@ export {
   BudgetExceededError,
 } from './utils/errors.js';
 
+export type { ProviderType, ProviderCredentials, ProviderRequest, ProviderResponse, ModelProvider } from './providers/types.js';
+export { AnthropicProvider, BedrockProvider, AzureOpenAIProvider, createProvider } from './providers/index.js';
+
+export type { RouteEntry, RoutingConfig } from './config/routing.js';
+export { loadRoutingConfig, resolveRoute } from './config/routing.js';
+
 export { AgentSpawner } from './spawner/index.js';
 export type { SpawnOptions } from './spawner/index.js';
 
@@ -74,3 +80,6 @@ export type { OrchestratorOptions, ExecutionResult } from './orchestrator/index.
 
 export { WorkflowEngine } from './workflow/index.js';
 export type { WorkflowOptions, WorkflowRunOptions } from './workflow/index.js';
+
+export type { AgentTemplate, TemplateVariable, TemplateVars, MarketplaceEntry, MarketplaceCatalog } from './templates/types.js';
+export { BUILT_IN_TEMPLATES, TemplateRegistry, resolveTemplate, validateVars } from './templates/index.js';

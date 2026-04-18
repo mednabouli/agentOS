@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { runInit } from '../commands/init.js';
 import { runRun } from '../commands/run.js';
+import { runRunIpc } from '../commands/run-ipc.js';
+import { runTemplate } from '../commands/template.js';
 import { runStatus } from '../commands/status.js';
 import { runLogs } from '../commands/logs.js';
 import { runCost } from '../commands/cost.js';
@@ -20,7 +22,11 @@ async function main(): Promise<void> {
       break;
 
     case 'run':
-      await runRun(rest, rootDir);
+      if (rest.includes('--ipc')) {
+        await runRunIpc(rest, rootDir);
+      } else {
+        await runRun(rest, rootDir);
+      }
       break;
 
     case 'status':
@@ -53,6 +59,10 @@ async function main(): Promise<void> {
 
     case 'resume':
       await runResume(rootDir);
+      break;
+
+    case 'template':
+      await runTemplate(rest, rootDir);
       break;
 
     case undefined:

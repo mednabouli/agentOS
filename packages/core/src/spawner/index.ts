@@ -1,6 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk';
 import type { AgentRole, AgentTask, AgentOutput, FileArtifact, TokenUsage } from '../types/index.js';
 import { getModelConfig, calculateCost } from '../config/model-registry.js';
+import { loadRoutingConfig, resolveRoute, type RoutingConfig } from '../config/routing.js';
+import { createProvider } from '../providers/factory.js';
+import type { ProviderCredentials } from '../providers/types.js';
 import { generateId } from '../utils/id.js';
 import { logger } from '../utils/logger.js';
 import { SpawnError } from '../utils/errors.js';
@@ -8,53 +10,81 @@ import { SpawnError } from '../utils/errors.js';
 export interface SpawnOptions {
   apiKey?: string | undefined;
   systemPrompt?: string | undefined;
+  routing?: RoutingConfig | undefined;
 }
 
 export class AgentSpawner {
-  private readonly client: Anthropic;
+  private readonly apiKey: string | undefined;
+  private readonly routing: RoutingConfig;
 
   constructor(options: SpawnOptions = {}) {
-    this.client = new Anthropic({
-      apiKey: options.apiKey ?? process.env['ANTHROPIC_API_KEY'],
-    });
+    this.apiKey = options.apiKey ?? process.env['ANTHROPIC_API_KEY'];
+    this.routing =
+      options.routing ??
+      loadRoutingConfig(
+        process.env['AGENTOS_STATE_DIR'] !== undefined
+          ? process.env['AGENTOS_STATE_DIR'] + '/..'
+          : undefined,
+      );
   }
 
   async spawn(task: AgentTask, options: SpawnOptions = {}): Promise<AgentOutput> {
-    const config = getModelConfig(task.role);
+    const modelConfig = getModelConfig(task.role);
+    const routing = options.routing ?? this.routing;
+    const { provider: providerType, model, credentials } = resolveRoute(task.role, routing);
+    const resolvedModel = model ?? modelConfig.model;
     const agentId = generateId();
 
     logger.info('Spawning agent', {
       agentId,
       role: task.role,
-      model: config.model,
+      provider: providerType,
+      model: resolvedModel,
       phase: task.phase,
       taskId: task.id,
     });
 
+    const creds: ProviderCredentials = {
+      ...credentials,
+      apiKey: credentials.apiKey ?? this.apiKey,
+    };
+
+    const provider = createProvider(providerType, creds);
     const systemPrompt = options.systemPrompt ?? buildSystemPrompt(task);
     const userMessage = buildUserMessage(task);
 
     try {
       const startMs = Date.now();
 
-      const params = buildRequestParams(config, systemPrompt, userMessage);
-      const response = await this.client.messages.create(params);
+      const response = await provider.complete({
+        model: resolvedModel,
+        systemPrompt,
+        userMessage,
+        thinkingBudget: modelConfig.thinkingBudget,
+        maxTokens: 8192,
+      });
 
       const latencyMs = Date.now() - startMs;
-      const usage = extractUsage(response.usage);
+      const usage: TokenUsage = {
+        inputTokens: response.inputTokens,
+        outputTokens: response.outputTokens,
+        cacheReadTokens: response.cacheReadTokens,
+        cacheWriteTokens: response.cacheWriteTokens,
+        thinkingTokens: response.thinkingTokens,
+      };
       const cost = calculateCost(task.role, usage.inputTokens, usage.outputTokens);
 
       logger.info('Agent completed', {
         agentId,
         role: task.role,
+        provider: providerType,
         latencyMs,
         cost: cost.toFixed(6),
         tokensUsed: usage.inputTokens + usage.outputTokens,
       });
 
-      const text = extractText(response.content);
-      const artifacts = parseArtifacts(text);
-      const { handoffTo, handoffPayload } = parseHandoff(text);
+      const artifacts = parseArtifacts(response.text);
+      const { handoffTo, handoffPayload } = parseHandoff(response.text);
 
       return {
         taskId: task.id,
@@ -71,28 +101,6 @@ export class AgentSpawner {
       throw new SpawnError(`Agent ${task.role} failed: ${message}`, task.role, task.id, err);
     }
   }
-}
-
-function buildRequestParams(
-  config: ReturnType<typeof getModelConfig>,
-  systemPrompt: string,
-  userMessage: string,
-): Anthropic.Messages.MessageCreateParamsNonStreaming {
-  const base: Anthropic.Messages.MessageCreateParamsNonStreaming = {
-    model: config.model,
-    max_tokens: 8192,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: userMessage }],
-  };
-
-  if (config.thinkingBudget > 0) {
-    return {
-      ...base,
-      thinking: { type: 'enabled', budget_tokens: config.thinkingBudget },
-    } as Anthropic.Messages.MessageCreateParamsNonStreaming;
-  }
-
-  return base;
 }
 
 function buildSystemPrompt(task: AgentTask): string {
@@ -118,23 +126,6 @@ function buildUserMessage(task: AgentTask): string {
     parts.push(`## Additional Context\n${task.input.context}`);
   }
   return parts.join('\n\n');
-}
-
-function extractText(content: Anthropic.Messages.ContentBlock[]): string {
-  return content
-    .filter((b): b is Anthropic.Messages.TextBlock => b.type === 'text')
-    .map((b) => b.text)
-    .join('\n');
-}
-
-function extractUsage(usage: Anthropic.Messages.Usage): TokenUsage {
-  return {
-    inputTokens: usage.input_tokens,
-    outputTokens: usage.output_tokens,
-    cacheReadTokens: usage.cache_read_input_tokens ?? 0,
-    cacheWriteTokens: usage.cache_creation_input_tokens ?? 0,
-    thinkingTokens: 0,
-  };
 }
 
 const FILE_FENCE_RE = /```file:([^\n]+)\n([\s\S]*?)```/g;

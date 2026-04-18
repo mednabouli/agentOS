@@ -8,6 +8,7 @@ const NAV = [
   { href: '/swarms/new', label: 'New Swarm', icon: '+' },
   { href: '/agents', label: 'Agents', icon: '⊞' },
   { href: '/costs', label: 'Costs', icon: '$' },
+  { href: '/templates', label: 'Templates', icon: '◈' },
   { href: '/prd', label: 'PRD Parser', icon: '≡' },
   { href: '/team', label: 'Team', icon: '⊕' },
   { href: '/settings', label: 'Settings', icon: '⚙' },
