@@ -42,12 +42,12 @@ vi.mock('../spawner/index.js', () => ({
 }));
 
 vi.mock('../state/index.js', () => ({
-  StateManager: vi.fn().mockImplementation(() => ({
-    saveCheckpoint: vi.fn().mockResolvedValue(undefined),
-    loadCheckpoint: vi.fn().mockResolvedValue(null),
-    listCheckpoints: vi.fn().mockResolvedValue([]),
-    deleteCheckpoints: vi.fn().mockResolvedValue(undefined),
-  })),
+  StateManager: class {
+    saveCheckpoint = vi.fn().mockResolvedValue(undefined);
+    loadCheckpoint = vi.fn().mockResolvedValue(null);
+    listCheckpoints = vi.fn().mockResolvedValue([]);
+    deleteCheckpoints = vi.fn().mockResolvedValue(undefined);
+  }
 }));
 
 describe('WorkflowEngine', () => {
