@@ -41,6 +41,8 @@ export class BedrockProvider implements ModelProvider {
 
     const client = new BedrockRuntimeClient(clientConfig);
 
+    // DocumentType: null | boolean | number | string | DocumentType[] | { [prop: string]: DocumentType }
+    type DocumentType = null | boolean | number | string | DocumentType[] | { [prop: string]: DocumentType };
     const additionalFields: Record<string, unknown> = {};
     if (req.thinkingBudget > 0) {
       additionalFields['thinking'] = {
@@ -55,7 +57,7 @@ export class BedrockProvider implements ModelProvider {
       messages: [{ role: 'user', content: [{ text: req.userMessage }] }],
       inferenceConfig: { maxTokens: req.maxTokens },
       ...(Object.keys(additionalFields).length > 0
-        ? { additionalModelRequestFields: additionalFields }
+        ? { additionalModelRequestFields: additionalFields as unknown as DocumentType }
         : {}),
     });
 
