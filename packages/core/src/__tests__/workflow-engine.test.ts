@@ -30,15 +30,15 @@ function makeNodes(): TaskNode[] {
 }
 
 vi.mock('../spawner/index.js', () => ({
-  AgentSpawner: vi.fn().mockImplementation(() => ({
-    spawn: vi.fn().mockResolvedValue({
+  AgentSpawner: class {
+    spawn = vi.fn().mockResolvedValue({
       taskId: crypto.randomUUID(),
       status: 'success',
       artifacts: [],
       tokensUsed: 100,
       cost: 0.001,
-    }),
-  })),
+    });
+  }
 }));
 
 vi.mock('../state/index.js', () => ({
